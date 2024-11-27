@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>길찾기 시스템</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+  <style>
+    #map {
+      width: 100%;
+      height: 600px;
+      margin-top: 20px;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+    }
+    .input-container {
+      margin-bottom: 10px;
+    }
+    .input-container input {
+      padding: 5px;
+      margin-right: 5px;
+    }
+    .input-container button {
+      padding: 5px 10px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .input-container button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h2>길찾기 시스템</h2>
+  <div class="input-container">
+    <label for="start">출발지: </label>
+    <input type="text" id="start" placeholder="출발지를 입력하세요" />
+    <label for="end">목적지: </label>
+    <input type="text" id="end" placeholder="목적지를 입력하세요" />
+    <button onclick="findRoute()">검색</button>
+  </div>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+  <script>
+    const map = L.map('map').setView([37.504350, 126.694396], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    function getAIRecommendedRoute(startCoords, endCoords) {
+      return [startCoords, endCoords];
+    }
+
+    let control = null;
+
+    function findRoute() {
+      const startInput = document.getElementById('start').value;
+      const endInput = document.getElementById('end').value;
+
+      if (!startInput || !endInput) {
+        alert("출발지와 목적지를 모두 입력해주세요.");
+        return;
+      }
+
+      const startCoords = [37.504350, 126.694396];
+      const endCoords = [37.566670, 126.978139];
+
+      const recommendedRoute = getAIRecommendedRoute(startCoords, endCoords);
+
+      if (control) {
+        map.removeControl(control);
+      }
+
+      control = L.Routing.control({
+        waypoints: [
+          L.latLng(recommendedRoute[0]),
+          L.latLng(recommendedRoute[1])
+        ],
+        routeWhileDragging: false,
+        showAlternatives: false,
+        createMarker: (i, wp) => {
+          return L.marker(wp.latLng).bindPopup(
+            i === 0 ? "출발지: 명신여고" : "목적지: 서울시청"
+          );
+        }
+      }).addTo(map);
+    }
+  </script>
+</body>
+</html>
